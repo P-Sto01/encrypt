@@ -41,6 +41,8 @@ def substitution(input,key):
     for i in input:
         if i in dict:
             output=output+dict[i]
+        else:
+            output=output+i
     return output
 
 def subs_d(input,key):
@@ -61,7 +63,21 @@ def subs_d(input,key):
     for i in input:
         if i in dict_val:
             output=output+dict_val[i]
+        else:
+            output=output+i
     return output
+
+def getbytes(key,lenght):
+    key = key.encode("utf-8")
+    return bytes(key[i%len(key)] for i in range(lenght))
+
+def xor(text):
+    global seedtxt
+    key=b""
+    out=b""
+    key = getbytes(seedtxt,len(text))
+    out = bytes(a ^ b for a, b in zip(text, key))
+    return out
 
 def divide(text,seed):
     num=int((str(seed))[0])
@@ -79,10 +95,11 @@ def encrypt(text,seed):
     out = substitution(out,seed)
     if int(str(seed)[0])%2==0:
         out = divide(out,seed)
-    return out
+    return base64.b64encode(xor(out.encode("utf-8"))).decode("utf-8")
 
 def decrypt(text,seed):
     out=text
+    out=xor(base64.b64decode(out.encode("utf-8"))).decode("utf-8")
     if int(str(seed)[0])%2==0:
         out = divide(out,seed)
     out = subs_d(out,seed)
@@ -108,16 +125,16 @@ if "-i" in args:
     filein = get_val(args,"-i")
     if not "-d" in args:
         with open(filein,"rb") as d:
-            text=base64.b64encode(d.read()).decode()
+            text=base64.b64encode(d.read()).decode("utf-8")
     else:
         with open(filein,"r") as d:
             text=d.read()
 
 if "-k" in args:
-    seed=get_val(args,"-k")
+    seedtxt=get_val(args,"-k")
 else:
-    seed=input("Please enter key: ")
-seed=key(seed)
+    seedtxt=input("Please enter key: ")
+seed=key(seedtxt)
 if text=="":
     if not "-d" in args:
         text=base64.b64encode(bytes(input("Please enter text: "),"utf-8")).decode("utf-8")
