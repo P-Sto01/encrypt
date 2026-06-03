@@ -26,45 +26,37 @@ def key(text):
 
 def substitution(input,key):
     dict={}
-    list=[]
+    vals=[]
     random.seed(key)
-    for i in range(127-32):
-        dict[chr(i+32)]=""
-    for i in dict:
-        list.append(i)
-    random.shuffle(list)
+    for i in range(256):
+        dict[i]=i
+    vals = list(range(256))
+    random.shuffle(vals)
     num=0
     for i in dict:
-        dict[i]=list[num]
+        dict[i]=vals[num]
         num+=1
-        output=""
+    output=b""
     for i in input:
-        if i in dict:
-            output=output+dict[i]
-        else:
-            output=output+i
+        output=output+bytes([dict[i]])
     return output
 
 def subs_d(input,key):
     dict={}
-    list=[]
+    vals=[]
     random.seed(key)
-    for i in range(127-32):
-        dict[chr(i+32)]=""
-    for i in dict:
-        list.append(i)
-    random.shuffle(list)
+    for i in range(256):
+        dict[i]=i
+    vals = list(range(256))
+    random.shuffle(vals)
     num=0
     for i in dict:
-        dict[i]=list[num]
+        dict[i]=vals[num]
         num+=1
-        output=""
+    output=b""
     dict_val = {v: k for k, v in dict.items()}
     for i in input:
-        if i in dict_val:
-            output=output+dict_val[i]
-        else:
-            output=output+i
+        output=output+bytes([dict_val[i]])
     return output
 
 def getbytes(key,lenght):
@@ -82,24 +74,21 @@ def xor(text):
 def divide(text,seed):
     num=int((str(seed))[0])
     arr=split_string(text,num)
-    out=""
+    out=b""
     for j in arr:
-        y=""
-        for k in j:
-            y=k+y
-        out+=y
+        out+=bytes(reversed(j))
     return out 
 
 def encrypt(text,seed):
-    out=text
+    out=text.encode("utf-8")
     out = substitution(out,seed)
     if int(str(seed)[0])%2==0:
         out = divide(out,seed)
-    return base64.b64encode(xor(out.encode("utf-8"))).decode("utf-8")
+    return base64.b64encode(xor(out)).decode("utf-8")
 
 def decrypt(text,seed):
     out=text
-    out=xor(base64.b64decode(out.encode("utf-8"))).decode("utf-8")
+    out=xor(base64.b64decode(out.encode("utf-8")))
     if int(str(seed)[0])%2==0:
         out = divide(out,seed)
     out = subs_d(out,seed)
@@ -147,10 +136,10 @@ if "-d" in args:
         if not os.path.isfile(filein):
             open(filein,"x")
         with open(filein,"wb") as f:
-            b=base64.b64decode(bytes(decrypt(text,seed),"utf-8"))
+            b=base64.b64decode(decrypt(text,seed))
             f.write(b)
     else:
-        print(base64.b64decode(bytes(decrypt(text,seed),"utf-8")).decode("utf-8"))
+        print(base64.b64decode(decrypt(text,seed)).decode("utf-8"))
 else:
     if "-o" in args:
         filein = get_val(args,"-o")
