@@ -80,15 +80,16 @@ def divide(text,seed):
     return out 
 
 def encrypt(text,seed):
-    out=text.encode("utf-8")
+    out=text
     out = substitution(out,seed)
     if int(str(seed)[0])%2==0:
         out = divide(out,seed)
-    return base64.b64encode(xor(out)).decode("utf-8")
+    out = xor(out)
+    return base64.b64encode(out).decode("utf-8")
 
 def decrypt(text,seed):
-    out=text
-    out=xor(base64.b64decode(out.encode("utf-8")))
+    out=base64.b64decode(text)
+    out=xor(out)
     if int(str(seed)[0])%2==0:
         out = divide(out,seed)
     out = subs_d(out,seed)
@@ -108,13 +109,11 @@ if args == []:
     print("No arguments were added!")
     for i in helptext:
         print(i)
-if "-d" in args:
-    decode=True
 if "-i" in args:
     filein = get_val(args,"-i")
     if not "-d" in args:
         with open(filein,"rb") as d:
-            text=base64.b64encode(d.read()).decode("utf-8")
+            text=d.read()
     else:
         with open(filein,"r") as d:
             text=d.read()
@@ -126,7 +125,7 @@ else:
 seed=key(seedtxt)
 if text=="":
     if not "-d" in args:
-        text=base64.b64encode(bytes(input("Please enter text: "),"utf-8")).decode("utf-8")
+        text=bytes(input("Please enter text: "),"utf-8")
     else:
         text=input("Please enter text: ")
 
@@ -136,10 +135,10 @@ if "-d" in args:
         if not os.path.isfile(filein):
             open(filein,"x")
         with open(filein,"wb") as f:
-            b=base64.b64decode(decrypt(text,seed))
+            b=decrypt(text,seed)
             f.write(b)
     else:
-        print(base64.b64decode(decrypt(text,seed)).decode("utf-8"))
+        print(decrypt(text,seed).decode("utf-8"))
 else:
     if "-o" in args:
         filein = get_val(args,"-o")
