@@ -6,4 +6,4 @@
 * Uses a key of any lenght
 ## How to use:
 The argument's list is available after adding -h to the command. Just use python with the libraries used in the file.
-## This (probbably) has quite a lot of bugs so be careful!
+## This (probably) has quite a lot of bugs so be careful!
